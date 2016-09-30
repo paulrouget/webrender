@@ -22,7 +22,7 @@ use webrender_traits::{ColorF, StackingContext, FilterOp, MixBlendMode};
 use webrender_traits::{ScrollEventPhase, ScrollLayerInfo, SpecificDisplayItem, ScrollLayerState};
 
 #[cfg(target_os = "macos")]
-const CAN_OVERSCROLL: bool = true;
+const CAN_OVERSCROLL: bool = false;
 
 #[cfg(not(target_os = "macos"))]
 const CAN_OVERSCROLL: bool = false;
