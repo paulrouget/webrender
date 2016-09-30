@@ -228,6 +228,9 @@ impl RenderBackend {
 
                             self.publish_frame(frame, &mut profile_counters);
                         }
+                        ApiMsg::SetOverscrollOptions(pipeline_id, options) => {
+                            self.scene.set_overscroll_options(pipeline_id, options);
+                        },
                         ApiMsg::Scroll(delta, cursor, move_phase) => {
                             let frame = profile_counters.total_time.profile(|| {
                                 if self.frame.scroll(delta, cursor, move_phase) {

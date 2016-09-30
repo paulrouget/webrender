@@ -13,6 +13,15 @@ use webrender_traits::{ColorF, DisplayListId, StackingContext, StackingContextId
 use webrender_traits::{SpecificDisplayListItem};
 use webrender_traits::{IframeInfo};
 use webrender_traits::{RectangleDisplayItem, ClipRegion, DisplayItem, SpecificDisplayItem};
+use webrender_traits::OverscrollOptions;
+
+#[cfg(target_os = "macos")]
+const DEFAULT_OVERSCROLL_OPTIONS: OverscrollOptions =
+    OverscrollOptions{ top: true, right: true, bottom: true, left: true };
+
+#[cfg(not(target_os = "macos"))]
+const DEFAULT_OVERSCROLL_OPTIONS: OverscrollOptions =
+    OverscrollOptions{ top: false, right: fase, bottom: false, left: false};
 
 #[derive(Debug)]
 pub struct ScenePipeline {
@@ -21,6 +30,7 @@ pub struct ScenePipeline {
     pub background_draw_list: Option<DrawListId>,
     pub root_stacking_context_id: StackingContextId,
     pub viewport_size: Size2D<f32>,
+    pub overscroll_options: OverscrollOptions,
 }
 
 pub struct Scene {
@@ -107,6 +117,14 @@ impl Scene {
         };
 
         self.display_list_map.insert(id, display_list);
+    }
+
+    pub fn set_overscroll_options(&mut self,
+                                  pipeline_id: PipelineId,
+                                  options: OverscrollOptions) {
+        if let Some(pipeline) = self.pipeline_map.get_mut(&pipeline_id) {
+            pipeline.overscroll_options = options;
+        }
     }
 
     pub fn add_stacking_context(&mut self,
@@ -204,6 +222,7 @@ impl Scene {
             background_draw_list: background_draw_list,
             root_stacking_context_id: stacking_context_id,
             viewport_size: viewport_size,
+            overscroll_options: DEFAULT_OVERSCROLL_OPTIONS,
         };
 
         if let Some(old_pipeline) = self.pipeline_map.insert(pipeline_id, new_pipeline) {

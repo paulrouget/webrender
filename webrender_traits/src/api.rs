@@ -8,7 +8,7 @@ use ipc_channel::ipc::{self, IpcBytesSender, IpcSender};
 use offscreen_gl_context::{GLContextAttributes, GLLimits};
 use std::cell::Cell;
 use {ApiMsg, AuxiliaryLists, BuiltDisplayList, ColorF, DisplayListId, Epoch};
-use {FontKey, IdNamespace, ImageFormat, ImageKey, NativeFontHandle, PipelineId};
+use {FontKey, IdNamespace, ImageFormat, ImageKey, NativeFontHandle, OverscrollOptions, PipelineId};
 use {RenderApiSender, ResourceId, ScrollEventPhase, ScrollLayerState};
 use {StackingContext, StackingContextId, WebGLContextId, WebGLCommand};
 use {GlyphKey, GlyphDimensions};
@@ -133,6 +133,11 @@ impl RenderApi {
     /// ```
     pub fn set_root_pipeline(&self, pipeline_id: PipelineId) {
         let msg = ApiMsg::SetRootPipeline(pipeline_id);
+        self.api_sender.send(msg).unwrap();
+    }
+
+    pub fn set_overscroll_options(&self, pipeline_id: PipelineId, options: OverscrollOptions) {
+        let msg = ApiMsg::SetOverscrollOptions(pipeline_id, options);
         self.api_sender.send(msg).unwrap();
     }
 

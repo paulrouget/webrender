@@ -21,11 +21,7 @@ use webrender_traits::{AuxiliaryLists, PipelineId, Epoch, ScrollPolicy, ScrollLa
 use webrender_traits::{ColorF, StackingContext, FilterOp, MixBlendMode};
 use webrender_traits::{ScrollEventPhase, ScrollLayerInfo, SpecificDisplayItem, ScrollLayerState};
 
-#[cfg(target_os = "macos")]
-const CAN_OVERSCROLL: bool = true;
-
-#[cfg(not(target_os = "macos"))]
-const CAN_OVERSCROLL: bool = false;
+const CAN_OVERSCROLL: bool = true; // FIXME: to remove once we managed to store overscroll options
 
 #[derive(Copy, Clone, PartialEq, PartialOrd, Debug)]
 pub struct FrameId(pub u32);

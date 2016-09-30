@@ -32,6 +32,8 @@ pub enum ApiMsg {
     UpdateImage(ImageKey, u32, u32, ImageFormat, Vec<u8>),
     /// Drops an image from the resource cache.
     DeleteImage(ImageKey),
+    /// FIXME
+    SetOverscrollOptions(PipelineId, OverscrollOptions),
     CloneApi(IpcSender<IdNamespace>),
     /// Supplies a new frame to WebRender.
     ///
@@ -307,6 +309,14 @@ pub enum ImageFormat {
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct ImageKey(u32, u32);
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+pub struct OverscrollOptions {
+    pub top: bool,
+    pub right: bool,
+    pub bottom: bool,
+    pub left: bool,
+}
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum ImageRendering {
