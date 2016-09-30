@@ -23,6 +23,9 @@ use webrender_traits::{VRCompositorCommand, VRCompositorHandler};
 use tiling::FrameBuilderConfig;
 use offscreen_gl_context::GLContextDispatcher;
 
+use webrender_traits::ScrollEventPhase;
+use euclid::Point2D;
+
 /// The render backend is responsible for transforming high level display lists into
 /// GPU-friendly work which is then submitted to the renderer in the form of a frame::Frame.
 ///
@@ -241,9 +244,9 @@ impl RenderBackend {
                             match frame {
                                 Some(frame) => {
                                     self.publish_frame(frame, &mut profile_counters);
-                                    self.notify_compositor_of_new_scroll_frame(true)
+                                    self.notify_compositor_of_new_scroll_frame(true, delta, move_phase)
                                 }
-                                None => self.notify_compositor_of_new_scroll_frame(false),
+                                None => self.notify_compositor_of_new_scroll_frame(false, delta, move_phase),
                             }
                         }
                         ApiMsg::ScrollLayersWithScrollId(origin, pipeline_id, scroll_root_id) => {
@@ -481,13 +484,17 @@ impl RenderBackend {
         notifier.as_mut().unwrap().as_mut().unwrap().new_frame_ready();
     }
 
-    fn notify_compositor_of_new_scroll_frame(&mut self, composite_needed: bool) {
+    fn notify_compositor_of_new_scroll_frame(&mut self,
+                                             composite_needed: bool,
+                                             delta: Point2D<f32>,
+                                             move_phase: ScrollEventPhase,
+                                             ) {
         // TODO(gw): This is kindof bogus to have to lock the notifier
         //           each time it's used. This is due to some nastiness
         //           in initialization order for Servo. Perhaps find a
         //           cleaner way to do this, or use the OnceMutex on crates.io?
         let mut notifier = self.notifier.lock();
-        notifier.as_mut().unwrap().as_mut().unwrap().new_scroll_frame_ready(composite_needed);
+        notifier.as_mut().unwrap().as_mut().unwrap().new_scroll_frame_ready(composite_needed, delta, move_phase);
     }
 
     fn handle_vr_compositor_command(&mut self, ctx_id: WebGLContextId, cmd: VRCompositorCommand) {

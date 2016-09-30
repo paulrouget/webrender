@@ -25,7 +25,7 @@ use webrender_traits::{WorldPoint, WorldPoint4D};
 use webrender_traits::{LayerToScrollTransform, ScrollToWorldTransform};
 
 #[cfg(target_os = "macos")]
-const CAN_OVERSCROLL: bool = true;
+const CAN_OVERSCROLL: bool = false;
 
 #[cfg(not(target_os = "macos"))]
 const CAN_OVERSCROLL: bool = false;
