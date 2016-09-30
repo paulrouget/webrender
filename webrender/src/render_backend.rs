@@ -16,12 +16,13 @@ use std::sync::{Arc, Mutex};
 use std::sync::mpsc::Sender;
 use texture_cache::TextureCache;
 use webrender_traits::{ApiMsg, AuxiliaryLists, BuiltDisplayList, IdNamespace};
-use webrender_traits::{RenderNotifier, WebGLContextId};
+use webrender_traits::{ScrollEventPhase, RenderNotifier, WebGLContextId};
 use batch::new_id;
 use device::TextureId;
 use record;
 use tiling::FrameBuilderConfig;
 use gleam::gl;
+use euclid::Point2D;
 
 pub struct RenderBackend {
     api_rx: IpcReceiver<ApiMsg>,
@@ -239,9 +240,9 @@ impl RenderBackend {
                             match frame {
                                 Some(frame) => {
                                     self.publish_frame(frame, &mut profile_counters);
-                                    self.notify_compositor_of_new_scroll_frame(true)
+                                    self.notify_compositor_of_new_scroll_frame(true, delta, move_phase)
                                 }
-                                None => self.notify_compositor_of_new_scroll_frame(false),
+                                None => self.notify_compositor_of_new_scroll_frame(false, delta, move_phase),
                             }
                         }
                         ApiMsg::TickScrollingBounce => {
@@ -407,13 +408,17 @@ impl RenderBackend {
         notifier.as_mut().unwrap().as_mut().unwrap().new_frame_ready();
     }
 
-    fn notify_compositor_of_new_scroll_frame(&mut self, composite_needed: bool) {
+    fn notify_compositor_of_new_scroll_frame(&mut self,
+                                             composite_needed: bool,
+                                             delta: Point2D<f32>,
+                                             move_phase: ScrollEventPhase,
+                                             ) {
         // TODO(gw): This is kindof bogus to have to lock the notifier
         //           each time it's used. This is due to some nastiness
         //           in initialization order for Servo. Perhaps find a
         //           cleaner way to do this, or use the OnceMutex on crates.io?
         let mut notifier = self.notifier.lock();
-        notifier.as_mut().unwrap().as_mut().unwrap().new_scroll_frame_ready(composite_needed);
+        notifier.as_mut().unwrap().as_mut().unwrap().new_scroll_frame_ready(composite_needed, delta, move_phase);
     }
 }
 
