@@ -240,9 +240,9 @@ impl RenderBackend {
                             match frame {
                                 Some(frame) => {
                                     self.publish_frame(frame, &mut profile_counters);
-                                    self.notify_compositor_of_new_scroll_frame(true, delta, move_phase)
+                                    self.notify_compositor_of_new_scroll_frame(true, delta, cursor, move_phase)
                                 }
-                                None => self.notify_compositor_of_new_scroll_frame(false, delta, move_phase),
+                                None => self.notify_compositor_of_new_scroll_frame(false, delta, cursor, move_phase),
                             }
                         }
                         ApiMsg::TickScrollingBounce => {
@@ -411,6 +411,7 @@ impl RenderBackend {
     fn notify_compositor_of_new_scroll_frame(&mut self,
                                              composite_needed: bool,
                                              delta: Point2D<f32>,
+                                             cursor: Point2D<f32>,
                                              move_phase: ScrollEventPhase,
                                              ) {
         // TODO(gw): This is kindof bogus to have to lock the notifier
@@ -418,7 +419,7 @@ impl RenderBackend {
         //           in initialization order for Servo. Perhaps find a
         //           cleaner way to do this, or use the OnceMutex on crates.io?
         let mut notifier = self.notifier.lock();
-        notifier.as_mut().unwrap().as_mut().unwrap().new_scroll_frame_ready(composite_needed, delta, move_phase);
+        notifier.as_mut().unwrap().as_mut().unwrap().new_scroll_frame_ready(composite_needed, delta, cursor, move_phase);
     }
 }
 
