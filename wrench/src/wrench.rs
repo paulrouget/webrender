@@ -71,7 +71,7 @@ impl RenderNotifier for Notifier {
         }
     }
 
-    fn new_scroll_frame_ready(&mut self, _composite_needed: bool) {
+    fn new_scroll_frame_ready(&mut self, _composite_needed: bool, _: Point2D<f32>, _: Point2D<f32>, _: ScrollEventPhase) {
         if let Some(ref window_proxy) = self.window_proxy {
             window_proxy.wakeup_event_loop();
         }

@@ -42,7 +42,7 @@ impl webrender_traits::RenderNotifier for Notifier {
                              _size: Option<LayerSize>) {
     }
 
-    fn new_scroll_frame_ready(&mut self, _composite_needed: bool) {
+    fn new_scroll_frame_ready(&mut self, _composite_needed: bool, _: Point2D<f32>, _: Point2D<f32>, _: ScrollEventPhase) {
     }
 }
 

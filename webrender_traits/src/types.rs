@@ -11,6 +11,7 @@ use channel::{PayloadSender, MsgSender};
 use core::nonzero::NonZero;
 use offscreen_gl_context::{GLContextAttributes, GLLimits};
 use std::sync::Arc;
+use euclid::Point2D;
 
 #[cfg(target_os = "macos")] use core_graphics::font::CGFont;
 #[cfg(target_os = "windows")] use dwrote::FontDescriptor;
@@ -441,7 +442,7 @@ pub struct RenderApiSender {
 
 pub trait RenderNotifier: Send {
     fn new_frame_ready(&mut self);
-    fn new_scroll_frame_ready(&mut self, composite_needed: bool, delta: Point2D<f32>, phase: ScrollEventPhase);
+    fn new_scroll_frame_ready(&mut self, composite_needed: bool, delta: Point2D<f32>, cursor: Point2D<f32>, phase: ScrollEventPhase);
     fn pipeline_size_changed(&mut self, pipeline_id: PipelineId, size: Option<LayoutSize>);
     fn external_event(&mut self, _evt: ExternalEvent) { unimplemented!() }
     fn shut_down(&mut self) {}

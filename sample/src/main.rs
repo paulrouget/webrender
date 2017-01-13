@@ -39,7 +39,7 @@ impl webrender_traits::RenderNotifier for Notifier {
         self.window_proxy.wakeup_event_loop();
     }
 
-    fn new_scroll_frame_ready(&mut self, _composite_needed: bool) {
+    fn new_scroll_frame_ready(&mut self, _composite_needed: bool, _: Point2D<f32>, _: Point2D<f32>) {
         self.window_proxy.wakeup_event_loop();
     }
 

@@ -88,7 +88,7 @@ pub fn run_reftests(wrench: &mut Wrench, window: &mut WindowWrapper, filename: &
         fn new_frame_ready(&mut self) {
             self.tx.send(()).unwrap();
         }
-        fn new_scroll_frame_ready(&mut self, _composite_needed: bool) {}
+        fn new_scroll_frame_ready(&mut self, _composite_needed: bool, _: Point2D<f32>, _: Point2D<f32>, _: ScrollEventPhase) {}
         fn pipeline_size_changed(&mut self, _: PipelineId, _: Option<LayoutSize>) {}
     }
     let (tx, rx) = channel();
