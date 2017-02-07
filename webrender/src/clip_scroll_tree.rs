@@ -74,7 +74,7 @@ impl ClipScrollTree {
         debug_assert!(self.nodes.is_empty());
 
         let identity = LayerToScrollTransform::identity();
-        let viewport = LayerRect::new(LayerPoint::zero(), *viewport_size);
+        let viewport = LayerRect::new(LayerPoint::new(0.0, -38.0), *viewport_size);
 
         let root_reference_frame_id = ScrollLayerId::root_reference_frame(pipeline_id);
         self.root_reference_frame_id = root_reference_frame_id;

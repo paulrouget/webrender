@@ -283,7 +283,7 @@ impl Frame {
             let topmost_scroll_layer_id = self.clip_scroll_tree.topmost_scroll_layer_id();
             debug_assert!(reference_frame_id != topmost_scroll_layer_id);
 
-            let viewport_rect = LayerRect::new(LayerPoint::zero(), root_pipeline.viewport_size);
+            let viewport_rect = LayerRect::new(LayerPoint::new(0.0, -38.0), root_pipeline.viewport_size);
             let clip = ClipRegion::simple(&viewport_rect);
             context.builder.push_clip_scroll_node(reference_frame_id,
                                                   &clip,
