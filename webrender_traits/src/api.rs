@@ -358,9 +358,10 @@ impl RenderApi {
     }
 
     pub fn set_window_parameters(&self,
-                                 window_size: DeviceUintSize,
+                                 window_rect: DeviceUintRect,
                                  inner_rect: DeviceUintRect) {
-        let msg = ApiMsg::SetWindowParameters(window_size, inner_rect);
+        // FIXME: should use rect, not size
+        let msg = ApiMsg::SetWindowParameters(window_rect.size, inner_rect);
         self.api_sender.send(msg).unwrap();
     }
 
