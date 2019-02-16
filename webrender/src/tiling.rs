@@ -1087,7 +1087,7 @@ impl CompositeOps {
 #[cfg_attr(feature = "replay", derive(Deserialize))]
 pub struct Frame {
     //TODO: share the fields with DocumentView struct
-    pub window_size: DeviceIntSize,
+    pub window_rect: DeviceIntRect,
     pub inner_rect: DeviceIntRect,
     pub background_color: Option<ColorF>,
     pub layer: DocumentLayer,

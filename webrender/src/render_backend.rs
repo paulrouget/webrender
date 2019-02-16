@@ -11,7 +11,7 @@
 use api::{ApiMsg, BuiltDisplayList, ClearCache, DebugCommand, DebugFlags};
 #[cfg(feature = "debugger")]
 use api::{BuiltDisplayListIter, SpecificDisplayItem};
-use api::{DevicePixelScale, DeviceIntPoint, DeviceIntRect, DeviceIntSize};
+use api::{DevicePixelScale, DeviceIntPoint, DeviceIntRect};
 use api::{DocumentId, DocumentLayer, ExternalScrollId, FrameMsg, HitTestFlags, HitTestResult};
 use api::{IdNamespace, LayoutPoint, PipelineId, RenderNotifier, SceneMsg, ScrollClamping};
 use api::{MemoryReport, VoidPtrToSizeFn};
@@ -69,7 +69,7 @@ use util::drain_filter;
 #[cfg_attr(feature = "replay", derive(Deserialize))]
 #[derive(Clone)]
 pub struct DocumentView {
-    pub window_size: DeviceIntSize,
+    pub window_rect: DeviceIntRect,
     pub inner_rect: DeviceIntRect,
     pub layer: DocumentLayer,
     pub pan: DeviceIntPoint,
@@ -350,7 +350,7 @@ struct Document {
 impl Document {
     pub fn new(
         id: DocumentId,
-        window_size: DeviceIntSize,
+        window_rect: DeviceIntRect,
         layer: DocumentLayer,
         default_device_pixel_ratio: f32,
     ) -> Self {
@@ -358,8 +358,8 @@ impl Document {
             scene: Scene::new(),
             removed_pipelines: Vec::new(),
             view: DocumentView {
-                window_size,
-                inner_rect: DeviceIntRect::new(DeviceIntPoint::zero(), window_size),
+                window_rect,
+                inner_rect: window_rect.clone(),
                 layer,
                 pan: DeviceIntPoint::zero(),
                 page_zoom_factor: 1.0,
@@ -386,7 +386,7 @@ impl Document {
     }
 
     fn has_pixels(&self) -> bool {
-        !self.view.window_size.is_empty_or_negative()
+        !self.view.window_rect.size.is_empty_or_negative()
     }
 
     fn process_frame_msg(
@@ -742,11 +742,11 @@ impl RenderBackend {
                 doc.view.page_zoom_factor = factor.get();
             }
             SceneMsg::SetWindowParameters {
-                window_size,
+                window_rect,
                 inner_rect,
                 device_pixel_ratio,
             } => {
-                doc.view.window_size = window_size;
+                doc.view.window_rect = window_rect;
                 doc.view.inner_rect = inner_rect;
                 doc.view.device_pixel_ratio = device_pixel_ratio;
             }
@@ -998,10 +998,10 @@ impl RenderBackend {
                 assert!(self.namespace_alloc_by_client);
                 debug_assert!(!self.documents.iter().any(|(did, _doc)| did.0 == namespace_id));
             }
-            ApiMsg::AddDocument(document_id, initial_size, layer) => {
+            ApiMsg::AddDocument(document_id, initial_rect, layer) => {
                 let document = Document::new(
                     document_id,
-                    initial_size,
+                    initial_rect,
                     layer,
                     self.default_device_pixel_ratio,
                 );
@@ -1082,7 +1082,7 @@ impl RenderBackend {
                             let captured = CapturedDocument {
                                 document_id: *id,
                                 root_pipeline_id: doc.scene.root_pipeline_id,
-                                window_size: doc.view.window_size,
+                                window_rect: doc.view.window_rect,
                             };
                             tx.send(captured).unwrap();
 

@@ -204,7 +204,7 @@ impl<'a> DisplayListFlattener<'a> {
         FrameBuilder::with_display_list_flattener(
             view.inner_rect,
             background_color,
-            view.window_size,
+            view.window_rect,
             flattener,
         )
     }

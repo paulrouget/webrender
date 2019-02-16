@@ -14,7 +14,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::u32;
 use {BuiltDisplayList, BuiltDisplayListDescriptor, ColorF, DeviceIntPoint, DeviceIntRect};
-use {DeviceIntSize, ExternalScrollId, FontInstanceKey, FontInstanceOptions};
+use {ExternalScrollId, FontInstanceKey, FontInstanceOptions};
 use {FontInstancePlatformOptions, FontKey, FontVariation, GlyphDimensions, GlyphIndex, ImageData};
 use {ImageDescriptor, ItemTag, LayoutPoint, LayoutSize, LayoutTransform, LayoutVector2D};
 use {BlobDirtyRect, ImageDirtyRect, ImageKey, BlobImageKey, BlobImageData};
@@ -121,7 +121,7 @@ impl Transaction {
     /// # Examples
     ///
     /// ```
-    /// # use webrender_api::{DeviceIntSize, PipelineId, RenderApiSender, Transaction};
+    /// # use webrender_api::{DeviceIntRect, PipelineId, RenderApiSender, Transaction};
     /// # fn example() {
     /// let pipeline_id = PipelineId(0, 0);
     /// let mut txn = Transaction::new();
@@ -201,13 +201,13 @@ impl Transaction {
 
     pub fn set_window_parameters(
         &mut self,
-        window_size: DeviceIntSize,
+        window_rect: DeviceIntRect,
         inner_rect: DeviceIntRect,
         device_pixel_ratio: f32,
     ) {
         self.scene_ops.push(
             SceneMsg::SetWindowParameters {
-                window_size,
+                window_rect,
                 inner_rect,
                 device_pixel_ratio,
             },
@@ -595,7 +595,7 @@ pub enum SceneMsg {
         preserve_frame_state: bool,
     },
     SetWindowParameters {
-        window_size: DeviceIntSize,
+        window_rect: DeviceIntRect,
         inner_rect: DeviceIntRect,
         device_pixel_ratio: f32,
     },
@@ -675,7 +675,7 @@ bitflags!{
 pub struct CapturedDocument {
     pub document_id: DocumentId,
     pub root_pipeline_id: Option<PipelineId>,
-    pub window_size: DeviceIntSize,
+    pub window_rect: DeviceIntRect,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -727,7 +727,7 @@ pub enum ApiMsg {
     /// Adds a new document namespace.
     CloneApiByClient(IdNamespace),
     /// Adds a new document with given initial size.
-    AddDocument(DocumentId, DeviceIntSize, DocumentLayer),
+    AddDocument(DocumentId, DeviceIntRect, DocumentLayer),
     /// A message targeted at a particular document.
     UpdateDocument(DocumentId, TransactionMsg),
     /// Deletes an existing document.
@@ -1010,11 +1010,11 @@ impl RenderApi {
         RenderApiSender::new(self.api_sender.clone(), self.payload_sender.clone())
     }
 
-    pub fn add_document(&self, initial_size: DeviceIntSize, layer: DocumentLayer) -> DocumentId {
+    pub fn add_document(&self, initial_rect: DeviceIntRect, layer: DocumentLayer) -> DocumentId {
         let new_id = self.next_unique_id();
         let document_id = DocumentId(self.namespace_id, new_id);
 
-        let msg = ApiMsg::AddDocument(document_id, initial_size, layer);
+        let msg = ApiMsg::AddDocument(document_id, initial_rect, layer);
         self.api_sender.send(msg).unwrap();
 
         document_id
@@ -1191,13 +1191,13 @@ impl RenderApi {
     pub fn set_window_parameters(
         &self,
         document_id: DocumentId,
-        window_size: DeviceIntSize,
+        window_rect: DeviceIntRect,
         inner_rect: DeviceIntRect,
         device_pixel_ratio: f32,
     ) {
         self.send_scene_msg(
             document_id,
-            SceneMsg::SetWindowParameters { window_size, inner_rect, device_pixel_ratio, },
+            SceneMsg::SetWindowParameters { window_rect, inner_rect, device_pixel_ratio, },
         );
     }
 

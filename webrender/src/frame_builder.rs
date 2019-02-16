@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-use api::{ColorF, DeviceIntPoint, DevicePixelScale, LayoutPixel, PicturePixel, RasterPixel};
-use api::{DeviceIntRect, DeviceIntSize, DocumentLayer, FontRenderMode, DebugFlags};
+use api::{ColorF, DeviceIntPoint, DeviceIntSize, DevicePixelScale, LayoutPixel, PicturePixel, RasterPixel};
+use api::{DeviceIntRect, DocumentLayer, FontRenderMode, DebugFlags};
 use api::{LayoutPoint, LayoutRect, LayoutSize, PipelineId, RasterSpace, WorldPoint, WorldRect, WorldPixel};
 use clip::{ClipDataStore, ClipStore};
 use clip_scroll_tree::{ClipScrollTree, ROOT_SPATIAL_NODE_INDEX, SpatialNodeIndex};
@@ -59,7 +59,7 @@ pub struct FrameBuilderConfig {
 pub struct FrameBuilder {
     screen_rect: DeviceIntRect,
     background_color: Option<ColorF>,
-    window_size: DeviceIntSize,
+    window_rect: DeviceIntRect,
     root_pic_index: PictureIndex,
     /// Cache of surface tiles from the previous frame builder
     /// that can optionally be consumed by this frame builder.
@@ -145,7 +145,7 @@ impl FrameBuilder {
             prim_store: PrimitiveStore::new(&PrimitiveStoreStats::empty()),
             clip_store: ClipStore::new(),
             screen_rect: DeviceIntRect::zero(),
-            window_size: DeviceIntSize::zero(),
+            window_rect: DeviceIntRect::zero(),
             background_color: None,
             root_pic_index: PictureIndex(0),
             pending_retained_tiles: RetainedTiles::new(),
@@ -173,7 +173,7 @@ impl FrameBuilder {
     pub fn with_display_list_flattener(
         screen_rect: DeviceIntRect,
         background_color: Option<ColorF>,
-        window_size: DeviceIntSize,
+        window_rect: DeviceIntRect,
         flattener: DisplayListFlattener,
     ) -> Self {
         FrameBuilder {
@@ -183,7 +183,7 @@ impl FrameBuilder {
             root_pic_index: flattener.root_pic_index,
             screen_rect,
             background_color,
-            window_size,
+            window_rect,
             pending_retained_tiles: RetainedTiles::new(),
             config: flattener.config,
         }
@@ -381,8 +381,10 @@ impl FrameBuilder {
         debug_flags: DebugFlags,
     ) -> Frame {
         profile_scope!("build");
+        let point = self.window_rect.bottom_right();
+        let size = DeviceIntSize::from_lengths(point.x_typed(), point.y_typed());
         debug_assert!(
-            DeviceIntRect::new(DeviceIntPoint::zero(), self.window_size)
+            DeviceIntRect::new(DeviceIntPoint::zero(), size)
                 .contains_rect(&self.screen_rect)
         );
 
@@ -505,7 +507,7 @@ impl FrameBuilder {
         resource_cache.end_frame(texture_cache_profile);
 
         Frame {
-            window_size: self.window_size,
+            window_rect: self.window_rect,
             inner_rect: self.screen_rect,
             device_pixel_ratio: device_pixel_scale.0,
             background_color: self.background_color,
